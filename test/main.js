@@ -9,130 +9,144 @@ var should = require("should");
 var gutil = require("gulp-util");
 var ngHtml2Js = require("../");
 
-describe("gulp-ng-html2js", function(){
-	describe("when file is provided via buffer", function(){
-		it("should generate the angular module", function(done){
-			var expectedFile = new gutil.File({
-				path: "test/expected/example.js",
-				cwd: "test/",
-				base: "test/expected",
-				contents: fs.readFileSync("test/expected/example.js")
-			});
+describe("gulp-ng-html2js", function () {
+    describe("when file is provided via buffer", function () {
+        it("should generate the angular module", function (done) {
+            var expectedFile = new gutil.File({
+                path: "test/expected/example.js",
+                cwd: "test/",
+                base: "test/expected",
+                contents: fs.readFileSync("test/expected/example.js")
+            });
 
-			testBufferedFile(null, expectedFile, done);
-		});
+            testBufferedFile(null, expectedFile, done);
+        });
 
-		it("should use options.moduleName when provided", function(done){
-			var expectedFile = new gutil.File({
-				path: "test/expected/exampleWithModuleName.js",
-				cwd: "test/",
-				base: "test/expected",
-				contents: fs.readFileSync("test/expected/exampleWithModuleName.js")
-			});
+        it("should use options.moduleName when provided", function (done) {
+            var expectedFile = new gutil.File({
+                path: "test/expected/exampleWithModuleName.js",
+                cwd: "test/",
+                base: "test/expected",
+                contents: fs.readFileSync("test/expected/exampleWithModuleName.js")
+            });
 
-			var params = {
-				moduleName: "myAwesomePartials"
-			};
+            var params = {
+                moduleName: "myAwesomePartials"
+            };
 
-			testBufferedFile(params, expectedFile, done);
-		});
+            testBufferedFile(params, expectedFile, done);
+        });
 
-		it("should add options.prefix to the url in the generated file", function(done){
-			var expectedFile = new gutil.File({
-				path: "test/expected/exampleWithPrefix.js",
-				cwd: "test/",
-				base: "test/expected",
-				contents: fs.readFileSync("test/expected/exampleWithPrefix.js")
-			});
+        it("should add options.prefix to the url in the generated file", function (done) {
+            var expectedFile = new gutil.File({
+                path: "test/expected/exampleWithPrefix.js",
+                cwd: "test/",
+                base: "test/expected",
+                contents: fs.readFileSync("test/expected/exampleWithPrefix.js")
+            });
 
-			var params = {
-				prefix: "/partials/"
-			};
+            var params = {
+                prefix: "/partials/"
+            };
 
-			testBufferedFile(params, expectedFile, done);
-		});
+            testBufferedFile(params, expectedFile, done);
+        });
 
-		it("should subtract options.stripPrefix from the url in the generated file", function(done){
-			var expectedFile = new gutil.File({
-				path: "test/expected/exampleWithStripPrefix.js",
-				cwd: "test/",
-				base: "test/expected",
-				contents: fs.readFileSync("test/expected/exampleWithStripPrefix.js")
-			});
+        it("should subtract options.stripPrefix from the url in the generated file", function (done) {
+            var expectedFile = new gutil.File({
+                path: "test/expected/exampleWithStripPrefix.js",
+                cwd: "test/",
+                base: "test/expected",
+                contents: fs.readFileSync("test/expected/exampleWithStripPrefix.js")
+            });
 
-			var params = {
-				stripPrefix: "fixtures/"
-			};
+            var params = {
+                stripPrefix: "fixtures/"
+            };
 
-			testBufferedFile(params, expectedFile, done);
-		});
+            testBufferedFile(params, expectedFile, done);
+        });
+        it("should subtract array of options.stripPrefix from the url in the generated file", function (done) {
+            var expectedFile = new gutil.File({
+                path: "test/expected/exampleWithStripPrefix.js",
+                cwd: "test/",
+                base: "test/expected",
+                contents: fs.readFileSync("test/expected/exampleWithStripPrefix.js")
+            });
 
-		function testBufferedFile(params, expectedFile, done){
-			var srcFile = new gutil.File({
-				path: "test/fixtures/example.html",
-				cwd: "test/",
-				base: "test",
-				contents: fs.readFileSync("test/fixtures/example.html")
-			});
+            var params = {
+                stripPrefix: ["fixtures/"]
+            };
 
-			var stream = ngHtml2Js(params);
+            testBufferedFile(params, expectedFile, done);
+        });
 
-			stream.on("data", function(newFile){
-				should.exist(newFile);
-				path.extname(newFile.path).should.equal(".js");
+        function testBufferedFile(params, expectedFile, done) {
+            var srcFile = new gutil.File({
+                path: "test/fixtures/example.html",
+                cwd: "test/",
+                base: "test",
+                contents: fs.readFileSync("test/fixtures/example.html")
+            });
 
-				should.exist(newFile.contents);
-				String(newFile.contents).should.equal(String(expectedFile.contents));
+            var stream = ngHtml2Js(params);
 
-				done();
-			});
+            stream.on("data", function (newFile) {
+                should.exist(newFile);
+                path.extname(newFile.path).should.equal(".js");
 
-			stream.write(srcFile);
-			stream.end();
-		}
-	});
+                should.exist(newFile.contents);
+                String(newFile.contents).should.equal(String(expectedFile.contents));
 
-	it("should pass on files which are null", function(done){
-		var srcFile = new gutil.File({
-			path: "test/fixtures/example.html",
-			cwd: "test/",
-			base: "test/fixtures",
-			contents: null
-		});
+                done();
+            });
 
-		var stream = ngHtml2Js();
+            stream.write(srcFile);
+            stream.end();
+        }
+    });
 
-		stream.on("data", function(newFile){
-			should.not.exist(newFile.contents);
-			done();
-		});
+    it("should pass on files which are null", function (done) {
+        var srcFile = new gutil.File({
+            path: "test/fixtures/example.html",
+            cwd: "test/",
+            base: "test/fixtures",
+            contents: null
+        });
 
-		stream.write(srcFile);
-		stream.end();
-	});
+        var stream = ngHtml2Js();
 
-	it("should error on stream", function(done){
-		var srcFile = new gutil.File({
-			path: "test/fixtures/example.html",
-			cwd: "test/",
-			base: "test/fixtures",
-			contents: fs.createReadStream("test/fixtures/example.html")
-		});
+        stream.on("data", function (newFile) {
+            should.not.exist(newFile.contents);
+            done();
+        });
 
-		var stream = ngHtml2Js();
+        stream.write(srcFile);
+        stream.end();
+    });
 
-		stream.on("error", function(err){
-			should.exist(err);
-			done();
-		});
+    it("should error on stream", function (done) {
+        var srcFile = new gutil.File({
+            path: "test/fixtures/example.html",
+            cwd: "test/",
+            base: "test/fixtures",
+            contents: fs.createReadStream("test/fixtures/example.html")
+        });
 
-		stream.on("data", function(newFile){
-			newFile.contents.pipe(es.wait(function(err, data){
-				done(err);
-			}));
-		});
+        var stream = ngHtml2Js();
 
-		stream.write(srcFile);
-		stream.end();
-	});
+        stream.on("error", function (err) {
+            should.exist(err);
+            done();
+        });
+
+        stream.on("data", function (newFile) {
+            newFile.contents.pipe(es.wait(function (err, data) {
+                done(err);
+            }));
+        });
+
+        stream.write(srcFile);
+        stream.end();
+    });
 });
