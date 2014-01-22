@@ -82,7 +82,7 @@ module.exports = function (options) {
                 options.stripPrefix = [options.stripPrefix];
             }
             options.stripPrefix.forEach(function (sp) {
-                if (url.indexOf(sp) === 0) {
+                if (url.indexOf(sp) >= 0) {
                     url = url.replace(sp, "");
                 }
             });
